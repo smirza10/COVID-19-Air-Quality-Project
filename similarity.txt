@@ -1,0 +1,117 @@
+import statistics
+import math
+
+def main():
+    
+    cook=[[5495.10, 89407],
+            [2419.60, 95385.00],
+            [2402.40, 29162.00],
+            [414.90, 42374.00],
+            [735.80, 12837.00],
+            [2718.00, 19595.00],
+            [1444.90, 14046.00],
+            [1381.00, 3985.00],
+            [2974.40, 22579.00],
+            [11379.50, 25782.00]]
+    #normalize the attributes
+    cookNorm=zScore(cook)
+    #Finding the distance between the records
+    cookSim = distance(cookNorm)
+    cookNames = ["Cook", "Los Angeles", "Harris", "Maricopa", "San Diego", "Dallas", "Broward", "Santa Clara", "Wayne", "Philadelphia"]
+    printScore(cookSim, cookNames)
+    kane = [[990.80, 7604.00],
+            [227.40, 408.00],
+            [301.20, 468.00],
+            [670.20, 12928.00],
+            [1748.00, 6506.00],
+            [754.30, 2581.00],
+            [446.70, 2336.00],
+            [257.80, 3751.00],
+            [756.40, 2690.00],
+            [230.70, 2064.00],
+            [769.90, 2821.00],
+            [424.00, 2362.00],
+            [63.40, 2783.00],
+            [583.00, 1798.00],
+            [282.70, 1033.00],
+            [824.60, 1862.00],
+            [1058.10, 805.00],
+            [227.60, 455.00],
+            [332.80, 1720.00],
+            [476.10, 1680.00],
+            [769.70, 388.00],
+            [327.10, 596.00],
+            [66.70, 378.00],
+            [152.80, 506.00],
+            [56.20, 149.00],
+            [220.80, 998.00],
+            [243.10, 124.00]]
+    #Coping the stats for peoria county        
+    peoria = kane.copy()
+    kaneNorm = zScore(kane) 
+    kaneSim = distance(kaneNorm)       
+    kaneNames = ["Kane","Sangamon","Peoria", "Palm Beach", "Fulton","Denton","Ventura", "Utah", "Guilford","Brazoria", "Galveston","Rutherford", "Weld", "St. Joseph","Alachua", "Lafayette", "New Hanover", "Smith", "Brazos", "Lackawanna", "Vanderburgh", "Shawnee", "Pueblo","Ector", "Yellowstone", "Olmsted","Douglas"]
+    #Coping the names for peoria
+    peoriaNames = kaneNames.copy()
+    printScore(kaneSim, kaneNames)
+    #Swithing values so peoria is first
+    temp = peoria[0]
+    peoria[0] = peoria[2]
+    peoria[2] = temp
+    temp = peoriaNames[0]
+    peoriaNames[0] = peoriaNames[2]
+    peoriaNames[2] = temp
+    peoriaNorm = zScore(peoria)
+    peoriaSim = distance(peoriaNorm) 
+    printScore(peoriaSim, peoriaNames)
+#Zscore Normalization method    
+def zScore(arr):
+    r = len(arr)
+    c = len(arr[0])
+    den = [0] * (r)
+    cases = [0] * (r)
+    mean = [0,0]
+    for i in range(r):
+        den[i] = arr[i][0]
+        cases[i] = arr[i][1]
+        for j in range(c):
+            mean[j] =  mean[j] + arr[i][j] #adding values up 
+    mean[0] = mean[0]/r # Dividing by number of rows to find mean
+    mean[1] = mean[1]/r
+    stdDen= statistics.stdev(den) #finding the standard deviation
+    stdCases = statistics.stdev(cases)
+    stdev = [stdDen,stdCases] # Creating an array with standard deviation for each column
+    arrNorm = arr
+    for i in range(r):
+        for j in range(c):
+            arrNorm[i][j] = (arr[i][j] - mean[j]) / stdev[j]  # zscore normalization of every value
+    return(arrNorm)
+
+def distance(arr): # Methond to get the distance
+    r = len(arr)
+    c = len(arr[0])
+    sim = [0] * r #array to hold value of similarity scores
+    for i in range(r):
+        ed = 0
+        for j in range(c):
+            ed = ed +  (arr[0][j] - arr[i][j]) * (arr[0][j] - arr[i][j])
+        ed = math.sqrt(ed)  #getting euclidiean distance for every row compared to the first one
+        sim[i] = ed 
+    return(sim)   
+def printScore(sim, names): #print method for each row 
+    r = len(sim) 
+    for i in range(r):
+        for j in range(r - 1):
+            if(sim[j] > sim[j + 1]):  #bubble sorting the values based on similarity score
+                temp = sim[j]
+                sim[j]  = sim[j + 1]
+                sim[j + 1 ] = temp
+                temp = names[j]   
+                names[j]  = names[j + 1]
+                names[j + 1 ] = temp   
+    for i in range(r):
+        if(i != 0):
+            print("Similarity Score between ", names[0], " and ", names[i], " is ", sim[i] ) #print statement
+    print()            
+    return         
+main() 
